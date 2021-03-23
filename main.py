@@ -20,7 +20,7 @@ import random
 # Default keybindings
 # Quick Cast All (no indicator)
 
-# customizable
+# customizable:
 client_dir = "C:/Riot Games/League of Legends/LeagueClient.exe"
 
 # only change if broken
@@ -46,7 +46,8 @@ images = {
     "select": "images/select.png",
     "honor": "images/honor.png",
     "clash": "images/got it.png",
-    "choose": "images/choose.png"
+    "choose": "images/choose.png",
+    "qing": "images/in q.png"
 }
 
 
@@ -72,7 +73,7 @@ def click_button(image, delay=0.2, timeout=5, button="left"):
     start_time = time.time()
     loc = None
     while time.time() - start_time < timeout:
-        loc = pyautogui.locateCenterOnScreen(image, confidence=0.9)
+        loc = pyautogui.locateCenterOnScreen(image=image, confidence=0.8, grayscale=True)
         if loc is not None:
             break
     if loc is None:
@@ -91,15 +92,21 @@ def open_client():
 
 def make_lobby():
     print("Making lobby.")
+    global state
     if (click_button(images.get("play")) and click_button(images.get("coop"))
             and click_button(images.get("beginner")) and click_button(images.get("confirm"))):
-        global state
         state = states[0]
         return True
+    else:
+        pyautogui.click()
+        if (click_button(images.get("coop"))
+                and click_button(images.get("beginner")) and click_button(images.get("confirm"))):
+            state = states[0]
+            return True
     return False
 
 
-def queue(timeout=1800):
+def queue(timeout=120):
     print("Queuing up.")
     click_button(images.get("queue"))
     start_time = time.time()
@@ -108,16 +115,17 @@ def queue(timeout=1800):
         if click_button(images.get("accept")):
             start_time = time.time()
             while time.time() - start_time < 15:
-                if pyautogui.locateOnScreen(images.get("free")) is not None:
+                if pyautogui.locateOnScreen(image=images.get("free"), confidence=0.8, grayscale=True) is not None:
                     state = states[1]
                     return True
-                if pyautogui.locateOnScreen(images.get("choose")) is not None:
+                if pyautogui.locateOnScreen(image=images.get("choose"), confidence=0.8, grayscale=True) is not None:
                     state = states[1]
                     return True
-        if pyautogui.locateOnScreen(images.get("choose")) is not None:
+        if pyautogui.locateOnScreen(image=images.get("choose"), confidence=0.8, grayscale=True) is not None:
             state = states[1]
             return True
-    if pyautogui.locateOnScreen(images.get("choose")) is not None or process_exists(game_process):
+    if pyautogui.locateOnScreen(image=images.get("choose"), confidence=0.8, grayscale=True) is not None or \
+            process_exists(game_process):
         state = states[1]
         return True
     return False
@@ -127,7 +135,7 @@ def champ_select():
     print("Selecting champion.")
     time.sleep(1)
     global state
-    free_champs = pyautogui.locateAllOnScreen(images.get("free"))
+    free_champs = pyautogui.locateAllOnScreen(image=images.get("free"), confidence=0.8, grayscale=True)
     for champ in free_champs:
         champ = [champ[0] - 20, champ[1] + 20]
         click(champ, 0.25)
@@ -141,11 +149,11 @@ def champ_select():
     return False
 
 
-def loading_screen(timeout=360):
+def loading_screen(timeout=420):
     print("Waiting for game to start.")
     start_time = time.time()
     while time.time() - start_time < timeout:
-        nexus_loc = pyautogui.locateOnScreen(images.get("nexus"))
+        nexus_loc = pyautogui.locateOnScreen(image=images.get("nexus"), confidence=0.8, grayscale=True)
         if nexus_loc is not None:
             global nexus, state
             # if abs(nexus_loc[0] - nexus[0]) > 100 or abs(nexus_loc[1] - nexus[1]) > 100:
@@ -207,7 +215,8 @@ def post_game():
     start_time = time.time()
     honor_loc = None
     while time.time() - start_time < 10:
-        honor_loc = pyautogui.locateCenterOnScreen(images.get("honor"))
+        pyautogui.click()
+        honor_loc = pyautogui.locateCenterOnScreen(image=images.get("honor"), confidence=0.8, grayscale=True)
         if honor_loc is not None:
             click(loc=honor_loc)
             break
@@ -224,7 +233,7 @@ def post_game():
 
 
 # restarts the game if there is an error
-def fail_safe(tries=5, timeout=30):
+def fail_safe(tries=5, timeout=90):
     print("Starting game...")
     global state
     state = None
@@ -232,11 +241,14 @@ def fail_safe(tries=5, timeout=30):
     start_time = time.time()
     while tries > 0:
         if process_exists(client_process) and \
-                pyautogui.locateOnScreen(images.get("play")) is not None and \
+                pyautogui.locateOnScreen(image=images.get("play"), confidence=0.8, grayscale=True) is not None and \
                 make_lobby():
             return
         else:
-            missions = pyautogui.locateOnScreen(images.get("missions"))
+            if pyautogui.locateOnScreen(image=images.get("nexus"), confidence=0.8, grayscale=True) is not None:
+                state = "game"
+                return
+            missions = pyautogui.locateOnScreen(image=images.get("missions"), confidence=0.8, grayscale=True)
             if missions is not None:
                 pyautogui.moveTo(x=missions[0], y=missions[1] + 300)
                 click_button(image=images.get("select"))
@@ -252,7 +264,10 @@ def fail_safe(tries=5, timeout=30):
     exit("Failed to load client (patching?).")
 
 
-fail_safe()
+if pyautogui.locateOnScreen(image=images.get("nexus"), confidence=0.8, grayscale=True) is not None:
+    state = "game"
+else:
+    fail_safe()
 while True:
     worked = True
     if state == "queue":
