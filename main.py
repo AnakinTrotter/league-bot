@@ -12,7 +12,7 @@ import random
 
 # Settings:
 # Stay signed in
-# Fullscreen
+# Borderless
 # HUD Scale: 0
 # Shop Scale: 44
 # Minimap Scale: 100
