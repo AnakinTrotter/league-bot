@@ -1,5 +1,5 @@
 # League-Bot
-A League of Legends bot to level up accounts. For best results use the recommended settings but it should work with little to no changes on any Windows computer.
+A League of Legends bot to level up accounts. For best results use the provided settings. This bot is designed for Windows computers.
 CHECK main.py OR READ BELOW FOR SETTINGS!
 
 Make sure you have python downloaded too: https://www.python.org/downloads/
