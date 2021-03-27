@@ -264,6 +264,18 @@ def fail_safe(tries=5, timeout=90):
     exit("Failed to load client (patching?).")
 
 
+def read_config():
+    config = open("config.txt")
+    if config.readline().lower()[8:].strip() != "true":
+        config.close()
+        return
+    print("Loading config...")
+    global client_dir
+    client_dir = config.readline()[14:].strip()
+    config.close()
+
+
+read_config()
 if pyautogui.locateOnScreen(image=images.get("nexus"), confidence=0.8, grayscale=True) is not None:
     state = "game"
 else:

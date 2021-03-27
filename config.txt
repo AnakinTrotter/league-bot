@@ -1,0 +1,2 @@
+enabled=true
+launcher_path=C:/Riot Games/League of Legends/LeagueClient.exe
