@@ -20,6 +20,7 @@ import random
 # Auto Attack: Enabled
 # Default keybindings
 # Quick Cast All (no indicator)
+# Colorblind mode off
 
 # customizable:
 client_dir = "C:/Riot Games/League of Legends/LeagueClient.exe"
