@@ -79,8 +79,10 @@ def click_button(image, delay=0.2, timeout=5, button="left"):
         if loc is not None:
             break
     if loc is None:
+        print("No button matching image " + image + " was found. Continuing...")
         return False
     click(loc, delay, button)
+    print("Button matching image " + image + " was found.")
     return True
 
 
@@ -105,13 +107,15 @@ def make_lobby():
                 and click_button(images.get("beginner")) and click_button(images.get("confirm"))):
             state = states[0]
             return True
+    print("Unable to make lobby.")
     return False
 
 
 def queue(timeout=120):
-    print("Queuing up.")
-    click_button(images.get("queue"))
+    while click_button(images.get("queue")):
+        print("Attempting to start queue.")
     start_time = time.time()
+    print("Queue successfully started at: " + str(start_time))
     global state
     while time.time() - start_time < timeout:
         if click_button(images.get("accept")):
@@ -130,6 +134,7 @@ def queue(timeout=120):
             process_exists(game_process):
         state = states[1]
         return True
+    print("Queue timed out.")
     return False
 
 
@@ -148,6 +153,7 @@ def champ_select():
     if click_button(image=images.get("pick"), delay=0):
         state = states[2]
         return True
+    print("No champions found in champ select.")
     return False
 
 
@@ -162,6 +168,7 @@ def loading_screen(timeout=420):
             #     nexus = [nexus_loc[0], nexus_loc[1]]
             state = states[3]
             return True
+    print("Loading screen timed out.")
     return False
 
 
@@ -228,6 +235,7 @@ def post_game():
     while not click_button(image=images.get("again"), timeout=1):
         click_button(image=images.get("ok"), timeout=10)
         if time.time() - start_time > 60:
+            print("Post game lobby timed out.")
             return False
     global state
     state = states[0]
@@ -297,4 +305,5 @@ while True:
     else:
         worked = False
     if not worked:
+        print("FATAL ERROR! Attempting fail safe measures...")
         fail_safe()
