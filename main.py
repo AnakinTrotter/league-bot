@@ -64,14 +64,14 @@ def process_exists(process_name):
     return last_line.lower().startswith(process_name.lower())
 
 
-def click(loc, delay=0.2, button="left"):
+def click(loc, delay=random.uniform(0.1, 0.4), button="left"):
     pyautogui.moveTo(x=loc[0], y=loc[1], duration=delay, tween=pyautogui.easeInSine)
     pydirectinput.mouseDown()
-    time.sleep(0.05)
+    time.sleep(random.uniform(0.05, 0.1))
     pydirectinput.mouseUp()
 
 
-def click_button(image, delay=0.2, timeout=5, button="left"):
+def click_button(image, delay=random.uniform(0.1, 0.4), timeout=5, button="left"):
     start_time = time.time()
     loc = None
     while time.time() - start_time < timeout:
